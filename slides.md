@@ -53,23 +53,25 @@ Publication: scp, git, dropbox, …
 
 ## Quels outils choisir ?
 
-**Ruby**: jekyll, nanoc
+**Ruby**: jekyll, nanoc, …
 
-**Python**: pelican, frozen flask
+**Python**: pelican, frozen flask, …
 
-**Node**: blacksmith
+**Node**: blacksmith, …
 
-**Haskell**: hakyll, gitit, yst
+**Haskell**: hakyll, gitit, yst, …
 
 ## Hakyll
 
 - Multi-plateformes
-- pandoc
-- flexible
+- utilise pandoc
+- **très** flexible
 
 ## Hakyll
 
 <http://jaspervdj.be/hakyll>
+
+Bibliothèque + DSL => build your own generator
 
 # À l'attaque
 
@@ -102,6 +104,17 @@ Crée un blog + pages statiques
     ghc --make site.hs # compile le générateur
     ./site preview # serveur HTTP + reload
 
+Ne pas oublier de recompiler `site.hs` après l'avoir modifié
+
+## Makefile
+
+On n'est pas des animaux, on utilise un Makefile
+
+- recompilation automatique après modification du haskell
+- vidage du cache
+- publication via git
+- …
+
 ## Makefile
 
 ```Makefile
@@ -119,6 +132,9 @@ preview: site
 
 clean: site
 	./site clean
+
+check: site
+    ./site check
 ```
 
 ## Makefile - publication
@@ -141,10 +157,9 @@ publish:
 
 ## Makefile - like a boss
 
-L'utilisation de `make` permet d'avoir un binaire toujours à jour.
-
     make clean
     make preview
+    make check # détecte les liens cassés
     make publish
 
 ## Playing with Hakyll
@@ -454,20 +469,27 @@ match "posts/*" $ do
 
 ## On peut aller plus loin
 
+GUI avec prose.io
+
+<http://prose.io/>
+
+Tags pour les articles de blog
+
+<http://jaspervdj.be/hakyll/reference/Hakyll-Web-Tags.html>
+
+
+## On peut aller plus loin
+
 Single page site:
 
 <https://github.com/divarvel/hakyll-single-page-test>
 
 ## On peut aller plus loin
 
-Web2day 2013: i18n, factorisation, dépendances inter-pages
+Web2day 2013: i18n, factorisation, dépendances inter-pages, génération de
+fichier ICS, blocs réutilisables, …
 
 <https://github.com/CompanyCampus/web2day2013>
 
 <http://blog.clement.delafargue.name/posts/2013-04-03-web2day-powered-by-hakyll-part-1.html>
 
-## On peut aller plus loin
-
-GUI avec prose.io
-
-<http://prose.io/>

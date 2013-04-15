@@ -15,13 +15,13 @@ slides.tex: slides.md
 		   -o slides.tex
 
 clean:
-	rm slides.html
-	rm slides.pdf
-	rm slides.tex
-	rm slides.log
-	rm slides.nav
-	rm slides.snm
-	rm slides.toc
-	rm slides.vrb
-	rm slides.aux
-	rm slides.out
+	-rm slides.html
+	-rm slides.pdf
+	-rm slides.tex
+	-rm slides.log
+	-rm slides.nav
+	-rm slides.snm
+	-rm slides.toc
+	-rm slides.vrb
+	-rm slides.aux
+	-rm slides.out

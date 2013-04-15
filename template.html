@@ -19,27 +19,29 @@ $for(css)$
 $endfor$
 $else$
 <link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>
+<link href='http://fonts.googleapis.com/css?family=Merriweather+Sans:400,300' rel='stylesheet'>
 <style>
   html { background-color: black; }
-  a { color: #FF0066; } a:hover {text-decoration: underline;}
+  a { color: #FF0044; } a:hover {text-decoration: underline;}
   footer { position: absolute; bottom: 50px; right: 50px; }
-  strong {color: #FF0066}
+  strong,code {color: #FF0044; } 
+  pre>code, code.sourceCode { color: #FFF; }
   body {
-      font-family: 'Oswald', arial, serif;
+      font-family: 'Merriweather Sans', arial, sans-serif;
       background-color: white;
       color: white;
-      font-size: 2em;
-      background: #1C1C1C;
+      font-size: 30px;
+      background: #232326;
   }
 
 
   /* Transition effect */
   section {
-      -moz-transition: left 400ms linear 0s;
-      -webkit-transition: left 400ms linear 0s;
-      -ms-transition: left 400ms linear 0s;
-      transition: left 400ms linear 0s;
-      background: #1C1C1C;
+      -moz-transition: left 400ms ease-in 0s;
+      -webkit-transition: left 400ms ease-in 0s;
+      -ms-transition: left 400ms ease-in 0s;
+      transition: left 400ms ease-in 0s;
+      background: #232326;
   }
   section { left: -150%; }
   section[aria-selected] { left: 0; }
@@ -48,21 +50,39 @@ $else$
   .chapter { background-color: black;}
   .chapter h1 {line-height: 600px; vertical-align: middle; margin: 0; text-align: center; display: block}
 
+  h1,h2,h3,h4,h5,h6 {
+      font-family: 'Oswald', arial, serif;
+      margin: 20px 100px 0 100px;
+  }
+
   h1 {
-      margin: 50px 100px 0 100px;
+      color: #FF0044;
       font-size: 50px;
       text-shadow: 0px -1px 0px #000;
       text-align: left;
   }
   h2 {
       color: #FAE50B;
-      margin: 70px 0 0 0;
+      margin-top: 10px;
       font-size: 40px;
-      text-align: center;
+      text-align: left;
+  }
+  h3,h4,h5,h6 {
+      color: #FAE50B;
+      margin-top: 10px;
+      font-size: 30px;
+      text-align: left;
+  }
+  h1.title { color: #FFFFFF; }
+  .author { color: #FF0066; }
+  .date {color: #FAE50B; }
+  footer {
+      position: absolute;
+      bottom: 50px;
   }
   ul {
       margin-top: 70px;
-      font-size: 35px;
+      font-size: 30px;
       text-align: right;
       border-right: 4px solid white;
       padding-right: 40px;
@@ -114,10 +134,12 @@ $endfor$
 $if(title)$
 <section>
   <h1 class="title">$title$</h1>
+  <footer>
 $for(author)$
   <h2 class="author">$author$</h2>
 $endfor$
   <h3 class="date">$date$</h3>
+  </footer>
 </section>
 $endif$
 $for(include-before)$

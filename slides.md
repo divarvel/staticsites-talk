@@ -12,7 +12,7 @@ Lourd, mélange contenu / présentation
 
 ## CMSs, CMSs everywhere
 
-Wordpress, Spip
+Wordpress, dotclear, Spip, …
 
 ## Le renouveau
 
@@ -26,9 +26,11 @@ Github pages => easy to set up
 
 ## Workflow
 
-Full text -> developer friendly (vim, git, make, …)
+Full text -> **developer friendly** (vim, git, make, …)
 
 Contributions: pull requests
+
+Publication: scp, git, dropbox, …
 
 ## En bonus
 
@@ -51,19 +53,23 @@ Contributions: pull requests
 
 ## Quels outils choisir ?
 
-Ruby: jekyll, nanoc
+**Ruby**: jekyll, nanoc
 
-Python: pelican, frozen flask
+**Python**: pelican, frozen flask
 
-Node: blacksmith
+**Node**: blacksmith
 
-Haskell: hakyll, gitit, yst
+**Haskell**: hakyll, gitit, yst
 
 ## Hakyll
 
 - Multi-plateformes
 - pandoc
 - flexible
+
+## Hakyll
+
+<http://jaspervdj.be/hakyll>
 
 # À l'attaque
 
@@ -73,15 +79,13 @@ Haskell: hakyll, gitit, yst
 
 Installe le compilo et l'outil de build / gestion de dépendances
 
-Dispo sur GNU/Linux, MacOS et Windows
-
-    aptitude install haskell-platform
-    brew install haskell-platform
+<http://www.haskell.org/platform/> (Gnu/Linux, MacOS, Windows)
 
 Pour windows, Mingw + MSYS en plus
 
 ------------------------------
 
+## Installation
 ### Hakyll
 
     cabal update
@@ -91,10 +95,12 @@ Pour windows, Mingw + MSYS en plus
 
 ## Warming up
 
+Crée un blog + pages statiques
+
     hakyll-init blog
     cd blog
-    ghc --make site.hs
-    ./site preview
+    ghc --make site.hs # compile le générateur
+    ./site preview # serveur HTTP + reload
 
 ## Makefile
 
@@ -118,7 +124,7 @@ clean: site
 ## Makefile - publication
 
 ```Makefile
-publish
+publish:
     git add .
     git stash save
     git checkout publish || git checkout --orphan publish
@@ -126,14 +132,16 @@ publish
         -exec rm -rf {} +
     find _site -maxdepth 1 -exec mv {} . \;
     rmdir _site
-    git add -A && git commit -m "Publish" || true
+    -git add -A && git commit -m "Publish"
     git push -f git+ssh://my-remote publish:master
     git checkout master
     git clean -fdx
-    git stash pop || true
+    -git stash pop
 ```
 
 ## Makefile - like a boss
+
+L'utilisation de `make` permet d'avoir un binaire toujours à jour.
 
     make clean
     make preview
@@ -143,12 +151,15 @@ publish
 
 ### Concepts de base
 
-Définition d'un ensemble de pipelines `Input File -> Output File`
+Ensemble de pipelines `Input -> Output`
+
+Matching -> Route -> Compilation -> Injection template
 
 Templates "purs" (pas de logique, juste des points d'injection)
 
 ------------------------------
 
+## Playing with Hakyll
 ### Structure de base
 
 ```haskell
@@ -164,6 +175,7 @@ helpers
 
 ------------------------------
 
+## Playing with Hakyll
 ### Static Assets
 
 ```haskell
@@ -178,6 +190,7 @@ match "css/*" $ do
 
 ------------------------------
 
+## Playing with Hakyll
 ### Pages statiques
 
 ```haskell
@@ -190,6 +203,7 @@ match (fromList [ "about.rst" , "contact.markdown" ]) $ do
 
 ------------------------------
 
+## Playing with Hakyll
 ### Templates
 
 Pas de `route` -> pas exposé dans le site généré
@@ -200,7 +214,8 @@ match "templates/*" $ compile templateCompiler
 
 ------------------------------
 
-### Ça reste du code
+## Playing with Hakyll
+### Helpers
 
 ```haskell
 postCtx :: Context String
@@ -208,7 +223,8 @@ postCtx =
     dateField "date" "%B %e, %Y" `mappend`
     defaultContext
 
-postList :: ([Item String] -> Compiler [Item String]) -> Compiler String
+postList :: ([Item String] -> Compiler [Item String])
+         -> Compiler String
 postList sortFilter = do
     posts   <- sortFilter =<< loadAll "posts/*"
     itemTpl <- loadBody "templates/post-item.html"
@@ -218,6 +234,7 @@ postList sortFilter = do
 
 ------------------------------
 
+## Playing with Hakyll
 ### Posts
 
 
@@ -233,6 +250,7 @@ match "posts/*" $ do
 ------------------------------
 
 
+## Playing with Hakyll
 ### Archive
 
 On peut créer des pages ex nihilo
@@ -241,20 +259,21 @@ On peut créer des pages ex nihilo
 create ["archive.html"] $ do
     route idRoute
     compile $ do
-        let archiveCtx =
+        let ctx =
                 field "posts" (\_ -> postList recentFirst) `mappend`
                 constField "title" "Archives"              `mappend`
                 defaultContext
 
         makeItem ""
-            >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
-            >>= loadAndApplyTemplate "templates/default.html" archiveCtx
+            >>= loadAndApplyTemplate "templates/archive.html" ctx
+            >>= loadAndApplyTemplate "templates/default.html" ctx
             >>= relativizeUrls
 ```
 
 
 ------------------------------
 
+## Playing with Hakyll
 ### Index
 
 ```haskell
@@ -285,7 +304,7 @@ Permet de transformer un `Item`, en gérant les dépendances.
 
 Par exemple : `pandocCompiler`
 
-Monadique => traduit la nature séquentielle des compilations
+*Monadique* => traduit la nature séquentielle des compilations
 
 ------------------------------
 
@@ -346,7 +365,7 @@ postCtx =
 
 `postCtx` extrait la date du nom de fichier et l'injecte dans le template.
 
-`mappend` permet de combiner deux contextes (`Context` est un monoide)
+`mappend` permet de combiner deux contextes (`Context` est un *monoide*)
 
 ------------------------------
 
@@ -409,22 +428,10 @@ Ajouter Disqus à ses articles de blog
 
 ```html
 $body$
-<!-- Disqus stuff-->
-<section>
-<div id="disqus_thread"></div>
+<section class="disqus">
 <script type="text/javascript">
-  /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-  var disqus_shortname = 'blogclementd',
-      disqus_url = window.location.href
-        .split('/')
-        .splice(0,3)
-        .join("/")+'$url$';
-  /* * * DON'T EDIT BELOW THIS LINE * * */
-  (function() {
-      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-      dsq.src ='http://' + disqus_shortname + '.disqus.com/embed.js';
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-  })();
+var page_url = "$url$";
+<!-- Disqus stuff  -->
 </script>
 </section>
 ```
@@ -444,3 +451,23 @@ match "posts/*" $ do
         >>= loadAndApplyTemplate "templates/default.html" postCtx
         >>= relativizeUrls
 ```
+
+## On peut aller plus loin
+
+Single page site:
+
+<https://github.com/divarvel/hakyll-single-page-test>
+
+## On peut aller plus loin
+
+Web2day 2013: i18n, factorisation, dépendances inter-pages
+
+<https://github.com/CompanyCampus/web2day2013>
+
+<http://blog.clement.delafargue.name/posts/2013-04-03-web2day-powered-by-hakyll-part-1.html>
+
+## On peut aller plus loin
+
+GUI avec prose.io
+
+<http://prose.io/>

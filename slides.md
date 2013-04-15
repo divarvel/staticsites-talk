@@ -165,11 +165,11 @@ Templates "purs" (pas de logique, juste des points d'injection)
 ```haskell
 main :: IO ()
 main = hakyll $ do
-    rule_1
-    …
-    rule_n
+  rule_1
+  …
+  rule_n
 
-…
+
 helpers
 ```
 
@@ -180,12 +180,12 @@ helpers
 
 ```haskell
 match "images/*" $ do
-    route   idRoute
-    compile copyFileCompiler
+  route   idRoute
+  compile copyFileCompiler
 
 match "css/*" $ do
-    route   idRoute
-    compile compressCssCompiler
+  route   idRoute
+  compile compressCssCompiler
 ```
 
 ------------------------------
@@ -195,10 +195,10 @@ match "css/*" $ do
 
 ```haskell
 match (fromList [ "about.rst" , "contact.markdown" ]) $ do
-    route   $ setExtension "html"
-    compile $ pandocCompiler
-        >>= loadAndApplyTemplate "templates/default.html" defaultContext
-        >>= relativizeUrls
+  route   $ setExtension "html"
+  compile $ pandocCompiler
+    >>= loadAndApplyTemplate "tpl/default.html" defaultContext
+    >>= relativizeUrls
 ```
 
 ------------------------------
@@ -209,7 +209,7 @@ match (fromList [ "about.rst" , "contact.markdown" ]) $ do
 Pas de `route` -> pas exposé dans le site généré
 
 ```haskell
-match "templates/*" $ compile templateCompiler
+match "tpl/*" $ compile templateCompiler
 ```
 
 ------------------------------
@@ -220,16 +220,16 @@ match "templates/*" $ compile templateCompiler
 ```haskell
 postCtx :: Context String
 postCtx =
-    dateField "date" "%B %e, %Y" `mappend`
-    defaultContext
+  dateField "date" "%B %e, %Y" `mappend`
+  defaultContext
 
 postList :: ([Item String] -> Compiler [Item String])
          -> Compiler String
 postList sortFilter = do
-    posts   <- sortFilter =<< loadAll "posts/*"
-    itemTpl <- loadBody "templates/post-item.html"
-    list    <- applyTemplateList itemTpl postCtx posts
-    return list
+  posts   <- sortFilter =<< loadAll "posts/*"
+  itemTpl <- loadBody "tpl/post-item.html"
+  list    <- applyTemplateList itemTpl postCtx posts
+  return list
 ```
 
 ------------------------------
@@ -240,11 +240,11 @@ postList sortFilter = do
 
 ```haskell
 match "posts/*" $ do
-    route $ setExtension "html"
-    compile $ pandocCompiler
-        >>= loadAndApplyTemplate "templates/post.html"    postCtx
-        >>= loadAndApplyTemplate "templates/default.html" postCtx
-        >>= relativizeUrls
+  route $ setExtension "html"
+  compile $ pandocCompiler
+    >>= loadAndApplyTemplate "tpl/post.html"    postCtx
+    >>= loadAndApplyTemplate "tpl/default.html" postCtx
+    >>= relativizeUrls
 ```
 
 ------------------------------
@@ -257,17 +257,17 @@ On peut créer des pages ex nihilo
 
 ```haskell
 create ["archive.html"] $ do
-    route idRoute
-    compile $ do
-        let ctx =
-                field "posts" (\_ -> postList recentFirst) `mappend`
-                constField "title" "Archives"              `mappend`
-                defaultContext
+  route idRoute
+  compile $ do
+    let ctx =
+      field "posts" (\_ -> postList recentFirst) `mappend`
+      constField "title" "Archives"              `mappend`
+      defaultContext
 
-        makeItem ""
-            >>= loadAndApplyTemplate "templates/archive.html" ctx
-            >>= loadAndApplyTemplate "templates/default.html" ctx
-            >>= relativizeUrls
+    makeItem ""
+      >>= loadAndApplyTemplate "tpl/archive.html" ctx
+      >>= loadAndApplyTemplate "tpl/default.html" ctx
+      >>= relativizeUrls
 ```
 
 
@@ -278,15 +278,15 @@ create ["archive.html"] $ do
 
 ```haskell
 match "index.html" $ do
-    route idRoute
-    compile $ do
-        let indexCtx = field "posts" $ \_ ->
-                            postList $ fmap (take 3) . recentFirst
+  route idRoute
+  compile $ do
+    let indexCtx = field "posts" $ \_ ->
+                        postList $ fmap (take 3) . recentFirst
 
-        getResourceBody
-            >>= applyAsTemplate indexCtx
-            >>= loadAndApplyTemplate "templates/default.html" postCtx
-            >>= relativizeUrls
+    getResourceBody
+      >>= applyAsTemplate indexCtx
+      >>= loadAndApplyTemplate "tpl/default.html" postCtx
+      >>= relativizeUrls
 ```
 
 ## Concepts de base
@@ -314,9 +314,9 @@ On peut y mettre ce qu'on veut. En particulier, du shell
 
 ```haskell
 match "assets/css/*.less" $ do
-   route   $ setExtension "css"
-   compile $ getResourceString >>=
-       withItemBody (unixFilter "lessc" ["-","--yui-compress","-O2"])
+  route   $ setExtension "css"
+  compile $ getResourceString >>=
+    withItemBody (unixFilter "lessc" ["-","--yui-compress","-O2"])
 ```
 
 ------------------------------
@@ -359,8 +359,8 @@ Dans le template :
 ```haskell
 postCtx :: Context String
 postCtx =
-    dateField "date" "%B %e, %Y" `mappend`
-    defaultContext
+  dateField "date" "%B %e, %Y" `mappend`
+  defaultContext
 ```
 
 `postCtx` extrait la date du nom de fichier et l'injecte dans le template.
@@ -409,12 +409,12 @@ Dans les routes :
 
 ```haskell
 forM_ langs (\lang ->
-    match $ fromGlob (lang ++ "/posts/*") do
-        route $ setHtmlLang
-        compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/post.html"    postCtx
-            >>= loadAndApplyTemplate "templates/default.html" postCtx
-            >>= relativizeUrls
+  match $ (fromGlob $ lang ++ "/posts/*") do
+    route setHtmlLang
+    compile $ pandocCompiler
+      >>= loadAndApplyTemplate "tpl/post.html"    postCtx
+      >>= loadAndApplyTemplate "tpl/default.html" postCtx
+      >>= relativizeUrls
 )
 ```
 
@@ -424,7 +424,7 @@ forM_ langs (\lang ->
 
 Ajouter Disqus à ses articles de blog
 
-`templates/disqus.html`
+`tpl/disqus.html`
 
 ```html
 $body$
@@ -444,12 +444,12 @@ Modification des règles de compilation
 
 ```haskell
 match "posts/*" $ do
-    route $ setExtension "html"
-    compile $ pandocCompiler
-        >>= loadAndApplyTemplate "templates/post.html"    postCtx
-        >>= loadAndApplyTemplate "templates/disqus.html"  postCtx
-        >>= loadAndApplyTemplate "templates/default.html" postCtx
-        >>= relativizeUrls
+  route $ setExtension "html"
+  compile $ pandocCompiler
+    >>= loadAndApplyTemplate "tpl/post.html"    postCtx
+    >>= loadAndApplyTemplate "tpl/disqus.html"  postCtx
+    >>= loadAndApplyTemplate "tpl/default.html" postCtx
+    >>= relativizeUrls
 ```
 
 ## On peut aller plus loin

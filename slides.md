@@ -1,4 +1,4 @@
-% Génération dynamique de sites statiques
+% Génération dynamique de sites statiques avec Hakyll
 % Clément Delafargue
 % 16 avril 2013
 
@@ -63,6 +63,7 @@ Publication: scp, git, dropbox, …
 
 ## Hakyll
 
+- Haskell
 - Multi-plateformes
 - utilise pandoc
 - **très** flexible

@@ -141,7 +141,7 @@ check: site
 ## Makefile - publication
 
 ```Makefile
-publish:
+publish: build
     git add .
     git stash save
     git checkout publish || git checkout --orphan publish
@@ -366,7 +366,7 @@ Dans le template :
 ```html
     <article>
         <h1>$title$</h1>
-        $body
+        $body$
     </article>
 ```
 

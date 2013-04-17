@@ -494,3 +494,12 @@ fichier ICS, blocs réutilisables, …
 
 <http://blog.clement.delafargue.name/posts/2013-04-03-web2day-powered-by-hakyll-part-1.html>
 
+## Bisous
+
+Source
+
+<https://github.com/divarvel/staticsites-talk>
+
+Version PDF
+
+<https://speakerdeck.com/clementd/hakyll-generation-dynamique-de-sites-statiques>

@@ -1,28 +1,28 @@
-% Génération dynamique de sites statiques avec Hakyll
+% Static site generation with Hakyll
 % Clément Delafargue
-% 16 avril 2013
+% scala.io - 2013-10-25
 
-# Un brin d'histoire
+# Some history
 
-## Pages perso en HTML statique
+## Static HTML personal homepages
 
-Quelques pages, pas DRY, contenu en HTML
+Few pages, not DRY, content directly in HTML
 
-Lourd, mélange contenu / présentation
+Heavy, mixes up content and presentation
 
 ## CMSs, CMSs everywhere
 
 Wordpress, dotclear, Spip, …
 
-## Le renouveau
+## A new hope
 
-Markdown => contenu plus léger
+Markdown => slick content
 
 Templating => keep it DRY
 
 Github pages => easy to set up
 
-# Pourquoi ça poutre
+# Why it's awesome
 
 ## Workflow
 
@@ -32,26 +32,26 @@ Contributions: pull requests
 
 Publication: scp, git, dropbox, …
 
-## En bonus
+## Bonus
 
 - cheap hosting (GH pages, S3)
 - secure
 - fast
 
-## Tout n'est pas rose…
+## Limits
 
-- rigide
-- pas adapté à tout le monde
-- pas de composante dynamique
+- rigid
+- not for everyone
+- not dynamic
 
-## … mais on peut se débrouiller
+## … and how to avoid them
 
-- certains outils sont très souples
-- un peu d'éducation, ça marche
-- utilisation de services externes
+- some tools are really flexible
+- education
+- external services
 
 
-## Quels outils choisir ?
+## The tool for the job
 
 **Ruby**: jekyll, nanoc, …
 
@@ -64,56 +64,39 @@ Publication: scp, git, dropbox, …
 ## Hakyll
 
 - Haskell
-- Multi-plateformes
-- utilise pandoc
-- **très** flexible
+- Multi-plateform
+- uses pandoc
+- **extremely** flexible
 
 ## Hakyll
 
 <http://jaspervdj.be/hakyll>
 
-Bibliothèque + DSL => build your own generator
+Library + eDSL => build your own generator
 
-# À l'attaque
-
-## Installation
-
-### Haskell platform (ghc + cabal)
-
-Installe le compilo et l'outil de build / gestion de dépendances
-
-<http://www.haskell.org/platform/> (Gnu/Linux, MacOS, Windows)
-
-Pour windows, Mingw + MSYS en plus
-
-------------------------------
+# Let's go
 
 ## Installation
-### Hakyll
 
-    cabal update
     cabal install hakyll
 
-(peut prendre un peu de temps)
 
 ## Warming up
 
-Crée un blog + pages statiques
+Blog + static pages
 
     hakyll-init blog
     cd blog
-    ghc --make site.hs # compile le générateur
-    ./site preview # serveur HTTP + reload
-
-Ne pas oublier de recompiler `site.hs` après l'avoir modifié
+    ghc --make site.hs # compiles the generator
+    ./site preview # HTTP server + reload
 
 ## Makefile
 
-On n'est pas des animaux, on utilise un Makefile
+Let's improve the workflow
 
-- recompilation automatique après modification du haskell
-- vidage du cache
-- publication via git
+- recompiles the generator when the source code is modified
+- cleans the cache
+- git-push publication
 - …
 
 ## Makefile
@@ -138,7 +121,7 @@ check: site
     ./site check
 ```
 
-## Makefile - publication
+## Makefile - publish
 
 ```Makefile
 publish: build
@@ -160,23 +143,21 @@ publish: build
 
     make clean
     make preview
-    make check # détecte les liens cassés
+    make check # detect broken links
     make publish
 
 ## Playing with Hakyll
 
-### Concepts de base
+### Base concepts
 
-Ensemble de pipelines `Input -> Output`
+Pipelines `Input -> Output`
 
-Matching -> Route -> Compilation -> Injection template
-
-Templates "purs" (pas de logique, juste des points d'injection)
+Matching -> Route -> Compilation -> Template injection
 
 ------------------------------
 
 ## Playing with Hakyll
-### Structure de base
+### Base structure
 
 ```haskell
 main :: IO ()
@@ -207,7 +188,7 @@ match "css/*" $ do
 ------------------------------
 
 ## Playing with Hakyll
-### Pages statiques
+### Static pages
 
 ```haskell
 match (fromList [ "about.rst" , "contact.markdown" ]) $ do
@@ -222,7 +203,7 @@ match (fromList [ "about.rst" , "contact.markdown" ]) $ do
 ## Playing with Hakyll
 ### Templates
 
-Pas de `route` -> pas exposé dans le site généré
+No `route` -> not exposed in the generated site
 
 ```haskell
 match "tpl/*" $ compile templateCompiler
@@ -269,21 +250,22 @@ match "posts/*" $ do
 ## Playing with Hakyll
 ### Archive
 
-On peut créer des pages ex nihilo
+Create pages from scratch
 
 ```haskell
 create ["archive.html"] $ do
-  route idRoute
-  compile $ do
-    let ctx =
-      field "posts" (\_ -> postList recentFirst) `mappend`
-      constField "title" "Archives"              `mappend`
-      defaultContext
+    route idRoute
+    compile $ do
+        posts <- recentFirst =<< loadAll "posts/*"
+        let archiveCtx =
+                listField "posts" postCtx (return posts) `mappend`
+                constField "title" "Archives"            `mappend`
+                defaultContext
 
-    makeItem ""
-      >>= loadAndApplyTemplate "tpl/archive.html" ctx
-      >>= loadAndApplyTemplate "tpl/default.html" ctx
-      >>= relativizeUrls
+        makeItem ""
+            >>= loadAndApplyTemplate "templates/archive.html" archiveCtx
+            >>= loadAndApplyTemplate "templates/default.html" archiveCtx
+            >>= relativizeUrls
 ```
 
 
@@ -294,39 +276,42 @@ create ["archive.html"] $ do
 
 ```haskell
 match "index.html" $ do
-  route idRoute
-  compile $ do
-    let indexCtx = field "posts" $ \_ ->
-                        postList $ fmap (take 3) . recentFirst
+    route idRoute
+    compile $ do
+        posts <- recentFirst =<< loadAll "posts/*"
+        let indexCtx =
+                listField "posts" postCtx (return posts) `mappend`
+                constField "title" "Home"                `mappend`
+                defaultContext
 
-    getResourceBody
-      >>= applyAsTemplate indexCtx
-      >>= loadAndApplyTemplate "tpl/default.html" postCtx
-      >>= relativizeUrls
+        getResourceBody
+            >>= applyAsTemplate indexCtx
+            >>= loadAndApplyTemplate "templates/default.html" indexCtx
+            >>= relativizeUrls
 ```
 
-## Concepts de base
+## Base concepts
 
 ### Item
 
-Paire `(identifiant, contenu)`
+`(identifiant, contenu)` pair
 
 
 ------------------------------
 
-### Compilateur
+### Compiler
 
-Permet de transformer un `Item`, en gérant les dépendances.
+Transforms an `Item`, handles the dependencies
 
-Par exemple : `pandocCompiler`
+eg : `pandocCompiler`
 
-*Monadique* => traduit la nature séquentielle des compilations
+*Monadic* => because compilations are sequential
 
 ------------------------------
 
-### Compilateur
+### Compiler
 
-On peut y mettre ce qu'on veut. En particulier, du shell
+Arbitrary action
 
 ```haskell
 match "assets/css/*.less" $ do
@@ -337,21 +322,21 @@ match "assets/css/*.less" $ do
 
 ------------------------------
 
-### Contexte
+### Context
 
-Données injectées dans un template.
+Used to inject data in a template
 
-Par exemple, `defaultContext` injecte :
+eg, `defaultContext` injects:
 
- - métadonnées (title, author, …)
+ - metadata (title, author, …)
  - body
 
 ------------------------------
 
 
-### Contexte
+### Context
 
-Dans le fichier :
+In the file:
 
 ```
 ---
@@ -361,7 +346,7 @@ title: Foo bar baz
 My awesome content
 ```
 
-Dans le template :
+In the template:
 
 ```html
     <article>
@@ -379,29 +364,29 @@ postCtx =
   defaultContext
 ```
 
-`postCtx` extrait la date du nom de fichier et l'injecte dans le template.
+`postCtx` extracts the date from the file name and injects it in the template.
 
-`mappend` permet de combiner deux contextes (`Context` est un *monoide*)
+`mappend` allows to combine two contexts (`Context` forms a *monoid*)
 
 ------------------------------
 
-Possibilité de construire ses propres contextes
+Roll your own context
 
- - fonction `Item a -> Compiler String`
- - données statiques
- - fonctions  (`$func arg$`)
+ - function `Item a -> Compiler String`
+ - static data
+ - functions  (`$func arg$`)
  - date
  - …
 
-## Patterns courants
+## Common patterns
 
 ### i18n (sort of)
 
-Contenu séparé dans des dossiers `/en` et `/fr`.
+Content in `/en` and `/fr` directories
 
-Templates en commun
+Shared templates
 
-Langue par défaut à la racine du site généré
+Default lang at root
 
 
 ------------------------------
@@ -412,7 +397,7 @@ Langue par défaut à la racine du site généré
 langs = ["fr", "en"]
 defaultLang = "fr"
 
--- Enlève automatiquement le "/fr" en début d'URL
+-- Removes "/fr"
 langRoute = gsubRoute (defaultLang ++ "/") (const "")
 setHtmlLang = langRoute `composeRoutes` (setExtension "html")
 ```
@@ -421,7 +406,7 @@ setHtmlLang = langRoute `composeRoutes` (setExtension "html")
 
 ### i18n (sort of)
 
-Dans les routes :
+In the routes:
 
 ```haskell
 forM_ langs (\lang ->
@@ -438,7 +423,7 @@ forM_ langs (\lang ->
 
 ### Disqus
 
-Ajouter Disqus à ses articles de blog
+Add disqus
 
 `tpl/disqus.html`
 
@@ -456,7 +441,7 @@ var page_url = "$url$";
 
 ### Disqus
 
-Modification des règles de compilation
+Modify compilation pipeline
 
 ```haskell
 match "posts/*" $ do
@@ -468,38 +453,36 @@ match "posts/*" $ do
     >>= relativizeUrls
 ```
 
-## On peut aller plus loin
+## Let's go farther
 
-GUI avec prose.io
+GUI with prose.io
 
 <http://prose.io/>
 
-Tags pour les articles de blog
+Tags for blog articles
 
 <http://jaspervdj.be/hakyll/reference/Hakyll-Web-Tags.html>
 
 
-## On peut aller plus loin
+## Let's go farther
 
 Single page site:
 
 <https://github.com/divarvel/hakyll-single-page-test>
 
-## On peut aller plus loin
+## Let's go farther
 
-Web2day 2013: i18n, factorisation, dépendances inter-pages, génération de
-fichier ICS, blocs réutilisables, …
 
-<https://github.com/CompanyCampus/web2day2013>
+scala.io: i18n, factoring, inter-pages dependencies, ICS generation, reusable
+blocks
+
+<https://github.com/scalaio/web>
 
 <http://blog.clement.delafargue.name/posts/2013-04-03-web2day-powered-by-hakyll-part-1.html>
 
 ## Bisous
 
-Source
+Source code
 
 <https://github.com/divarvel/staticsites-talk>
 
-Version PDF
-
-<https://speakerdeck.com/clementd/hakyll-generation-dynamique-de-sites-statiques>
